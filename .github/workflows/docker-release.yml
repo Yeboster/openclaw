@@ -18,9 +18,25 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  # Tag version: current date (YYYY-M-DD) on main, or tag name (strip v) on v*
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set.outputs.version }}
+    steps:
+      - name: Set version for tagging
+        id: set
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "version=$(date +%Y-%-m-%-d)" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
   # Build amd64 image
   build-amd64:
     runs-on: ubuntu-latest
+    needs: [version]
     permissions:
       packages: write
       contents: read
@@ -47,7 +63,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
+            type=raw,value=${{ needs.version.outputs.version }}
+            type=raw,value=${{ needs.version.outputs.version }},suffix=-amd64
             type=ref,event=branch
+            type=ref,event=branch,suffix=-amd64
             type=semver,pattern={{version}}
             type=semver,pattern={{version}},suffix=-amd64
             type=ref,event=branch,suffix=-amd64
@@ -68,6 +87,7 @@ jobs:
   # Build arm64 image
   build-arm64:
     runs-on: ubuntu-24.04-arm
+    needs: [version]
     permissions:
       packages: write
       contents: read
@@ -94,7 +114,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
+            type=raw,value=${{ needs.version.outputs.version }}
+            type=raw,value=${{ needs.version.outputs.version }},suffix=-arm64
             type=ref,event=branch
+            type=ref,event=branch,suffix=-arm64
             type=semver,pattern={{version}}
             type=semver,pattern={{version}},suffix=-arm64
             type=ref,event=branch,suffix=-arm64
@@ -105,6 +128,7 @@ jobs:
         with:
           context: .
           platforms: linux/arm64
+          build-args: VERSION=${{ needs.version.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache:arm64
@@ -118,7 +142,7 @@ jobs:
     permissions:
       packages: write
       contents: read
-    needs: [build-amd64, build-arm64]
+    needs: [version, build-amd64, build-arm64]
     steps:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -133,6 +157,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
+            type=raw,value=${{ needs.version.outputs.version }}
             type=ref,event=branch
             type=semver,pattern={{version}}
 
