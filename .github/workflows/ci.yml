@@ -180,9 +180,10 @@ jobs:
           BUILD_CONFIG: release
           BUILD_ARCHS: all
           SKIP_NOTARIZE: 1
+          ALLOW_ADHOC_SIGNING: 1
         run: |
           set -euo pipefail
-          echo "Packaging macOS distribution (BUILD_CONFIG=$BUILD_CONFIG BUILD_ARCHS=$BUILD_ARCHS SKIP_NOTARIZE=$SKIP_NOTARIZE)"
+          echo "Packaging macOS distribution (BUILD_CONFIG=$BUILD_CONFIG BUILD_ARCHS=$BUILD_ARCHS SKIP_NOTARIZE=$SKIP_NOTARIZE ALLOW_ADHOC_SIGNING=$ALLOW_ADHOC_SIGNING)"
           ./scripts/package-mac-dist.sh
           ls -la dist || true
 
