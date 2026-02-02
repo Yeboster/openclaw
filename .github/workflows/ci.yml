@@ -147,3 +147,22 @@ jobs:
 
       - name: Run ${{ matrix.task }}
         run: ${{ matrix.command }}
+
+      - name: Package macOS distribution
+        if: matrix.task == 'build'
+        env:
+          BUILD_CONFIG: release
+          BUILD_ARCHS: all
+          SKIP_NOTARIZE: 1
+        run: |
+          set -euo pipefail
+          echo "Packaging macOS distribution (BUILD_CONFIG=$BUILD_CONFIG BUILD_ARCHS=$BUILD_ARCHS SKIP_NOTARIZE=$SKIP_NOTARIZE)"
+          ./scripts/package-mac-dist.sh
+          ls -la dist || true
+
+      - name: Upload macOS artifacts
+        if: matrix.task == 'build'
+        uses: actions/upload-artifact@v4
+        with:
+          name: openclaw-macos-dist
+          path: dist/**
