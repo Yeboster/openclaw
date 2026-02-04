@@ -24,8 +24,13 @@ RUN curl -L https://github.com/Yeboster/sag/releases/download/v0.23.4/sag_0.23.4
 RUN curl -L https://github.com/steipete/CodexBar/releases/download/v0.18.0-beta.2/CodexBarCLI-v0.18.0-beta.2-linux-aarch64.tar.gz \
   | tar -xz -C /usr/local/bin && chmod +x /usr/local/bin/codexbar
 
+# Obsidian CLI
 RUN curl -L https://github.com/Yakitrak/obsidian-cli/releases/download/v0.2.3/obsidian-cli_0.2.3_linux_arm64.tar.gz \
   | tar -xz -C /usr/local/bin && chmod +x /usr/local/bin/obsidian-cli
+
+# Github
+RUN curl -L https://github.com/cli/cli/releases/download/v2.86.0/gh_2.86.0_linux_arm64.tar.gz \
+  | tar -xz -C /usr/local/bin gh_2.86.0_linux_arm64/bin/gh && chmod +x /usr/local/bin/gh
 
 # Install ClawdHub CLI (Skills) & MCPorter CLI (MPC)
 RUN npm install -g --prefix /usr/local clawdhub mcporter
